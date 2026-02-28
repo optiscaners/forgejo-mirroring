@@ -66,7 +66,7 @@ docker compose up -d
 Sync GitHub and GitLab repositories with Forgejo.
 
 ```sh
-docker exec -it fm forgejo-mirroring sync
+docker exec -it forgejo-mirroring forgejo-mirroring sync
 ```
 
 | Option       | Alias | Description                                  | Default |
@@ -79,7 +79,7 @@ docker exec -it fm forgejo-mirroring sync
 Erase Forgejo mirrored repositories to create new mirrors of GitHub and GitLab repositories with Forgejo.
 
 ```sh
-docker exec -it fm forgejo-mirroring override
+docker exec -it forgejo-mirroring forgejo-mirroring override
 ```
 
 | Option       | Alias | Description                                  | Default |
@@ -96,7 +96,7 @@ sudo crontab -e
 
 ```bash
 # Every sunday
-0 0 * * SUN docker exec -it fm forgejo-mirroring sync -a
+0 0 * * SUN docker exec -it forgejo-mirroring forgejo-mirroring sync -a
 ```
 
 ### Refresh token
@@ -104,7 +104,7 @@ sudo crontab -e
 If you need to refresh GitHub and GitLab tokens, change tokens into `.env` and use `override` command:
 
 ```sh
-docker exec -it fm forgejo-mirroring override -a
+docker exec -it forgejo-mirroring forgejo-mirroring override -a
 ```
 
 <!-- ### Test
