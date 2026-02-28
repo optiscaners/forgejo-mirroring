@@ -1,7 +1,7 @@
 services:
   cli:
     build: .
-    container_name: fm
+    container_name: forgejo-mirroring
     restart: unless-stopped
     network_mode: "host"
     env_file:
