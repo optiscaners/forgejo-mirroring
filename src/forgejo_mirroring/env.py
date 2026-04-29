@@ -15,6 +15,8 @@ GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 GITHUB_ORGS = os.environ.get("GITHUB_ORGS")
 
 FORGEJO_DOMAIN = os.environ.get("FORGEJO_DOMAIN")
+FORGEJO_URL = os.environ.get("FORGEJO_URL")
+FORGEJO_PROTOCOL = os.environ.get("FORGEJO_PROTOCOL", "https")
 FORGEJO_TOKEN = os.environ.get("FORGEJO_TOKEN")
 
 PER_PAGE = int(os.environ.get("PER_PAGE", 50))

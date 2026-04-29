@@ -5,7 +5,9 @@ from typing import List
 from forgejo_mirroring.models import Repository, RequestMethod, Gitforge
 from forgejo_mirroring.env import (
     FORGEJO_DOMAIN,
+    FORGEJO_PROTOCOL,
     FORGEJO_TOKEN,
+    FORGEJO_URL,
     PER_PAGE,
 )
 import forgejo_mirroring.utils as utils
@@ -199,4 +201,14 @@ class ForgeForgejo(Forge):
         return FORGEJO_TOKEN or ""
 
     def _set_api_url(self):
-        return f"https://{FORGEJO_DOMAIN}/api/v1"
+        if FORGEJO_URL:
+            base_url = FORGEJO_URL
+        else:
+            domain = FORGEJO_DOMAIN or "codeberg.org"
+            if domain.startswith(("http://", "https://")):
+                base_url = domain
+            else:
+                protocol = (FORGEJO_PROTOCOL or "https").rstrip(":/")
+                base_url = f"{protocol}://{domain}"
+
+        return f"{base_url.rstrip('/')}/api/v1"

@@ -44,6 +44,8 @@ Here domain is `gitlab.com`, of course you can replace with your own instance.
 
 Here domain is `codeberg.org`, of course you can replace with your own instance.
 
+- `FORGEJO_URL`: optional full Forgejo base URL, for example `http://192.168.19.45:3000`
+- `FORGEJO_PROTOCOL`: protocol for `FORGEJO_DOMAIN`, default is `https`
 - `FORGEJO_DOMAIN`: set Forgejo domain, default is `codeberg.org`
 - `FORGEJO_TOKEN`: set Forgejo token, go to <https://codeberg.org/user/settings/applications> to generate it
 

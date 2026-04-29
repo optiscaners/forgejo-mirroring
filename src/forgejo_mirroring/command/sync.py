@@ -4,8 +4,20 @@ from typing import List
 from forgejo_mirroring.args import ForgejoMirroringArgs
 from forgejo_mirroring.models import Repository
 from forgejo_mirroring.forge import ForgeForgejo, ForgeGithub, ForgeGitlab, Forge
-from forgejo_mirroring.env import logger
+from forgejo_mirroring.env import (
+    GITHUB_ORGS,
+    GITHUB_TOKEN,
+    GITLAB_DOMAIN,
+    GITLAB_ORGS,
+    GITLAB_TOKEN,
+    logger,
+)
 import forgejo_mirroring.utils as utils
+
+
+def _is_configured(*values: str | None) -> bool:
+    """Return True when all config values are present and not placeholder nulls."""
+    return all(value and value.strip().lower() not in {"none", "null"} for value in values)
 
 
 class CommandSync:
@@ -14,8 +26,17 @@ class CommandSync:
     def __init__(self, args: ForgejoMirroringArgs, override: bool = False):
         self._args = args
         self._forgejo = ForgeForgejo()
-        self._github = ForgeGithub()
-        self._gitlab = ForgeGitlab()
+        self._sources: list[Forge] = []
+
+        if _is_configured(GITHUB_TOKEN, GITHUB_ORGS):
+            self._sources.append(ForgeGithub())
+        else:
+            logger.info("Skip GitHub: GITHUB_TOKEN or GITHUB_ORGS missing")
+
+        if _is_configured(GITLAB_DOMAIN, GITLAB_TOKEN, GITLAB_ORGS):
+            self._sources.append(ForgeGitlab())
+        else:
+            logger.info("Skip GitLab: GITLAB_DOMAIN, GITLAB_TOKEN or GITLAB_ORGS missing")
 
         self._listing_forgejo()
 
@@ -23,17 +44,15 @@ class CommandSync:
             self._delete_forgejo_mirrors()
             self._listing()
 
-            self._mirror(self._github.repositories, self._github)
-            self._mirror(self._gitlab.repositories, self._gitlab)
+            for forge in self._sources:
+                self._mirror(forge.repositories, forge)
         else:
             self._listing()
 
-            github_missing = self._forgejo.syncing(self._github.repositories)
-            gitlab_missing = self._forgejo.syncing(self._gitlab.repositories)
-
-            logger.info("Mirroring GitHub repositories...")
-            self._mirror(github_missing, self._github)
-            self._mirror(gitlab_missing, self._gitlab)
+            for forge in self._sources:
+                missing = self._forgejo.syncing(forge.repositories)
+                logger.info("Mirroring %s repositories...", forge.__class__.__name__)
+                self._mirror(missing, forge)
 
             if args.pull:
                 self._sync_mirrors()
@@ -51,11 +70,10 @@ class CommandSync:
         self._forgejo.listing()
 
     def _listing(self):
-        """Fetch repositories of GitHub and GitLab"""
-        logger.info("🚀 Fetch GitHub repositories...")
-        self._github.listing()
-        logger.info("🚀 Fetch GitLab repositories...")
-        self._gitlab.listing()
+        """Fetch repositories of configured source forges"""
+        for forge in self._sources:
+            logger.info("Fetch %s repositories...", forge.__class__.__name__)
+            forge.listing()
 
     def _mirror(self, repositories: List[Repository], forge: Forge):
         """Mirror `repositories` to Forgejo"""
